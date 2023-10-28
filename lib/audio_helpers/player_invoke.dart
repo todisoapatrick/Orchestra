@@ -47,9 +47,9 @@ class PlayerInvoke {
   static Future<void> setValues(List arr, int index,
       {recommend = false}) async {
     final List<MediaItem> queue = [];
-    final Map playItem = arr[index] as Map;
-    final Map? nextItem =
-        index == arr.length - 1 ? null : arr[index + 1] as Map;
+    //final Map playItem = arr[index] as Map;
+    //final Map? nextItem =
+    //    index == arr.length - 1 ? null : arr[index + 1] as Map;
 
     queue.addAll(
       arr.map(

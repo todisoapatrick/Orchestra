@@ -24,12 +24,7 @@ class AllSongRow extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(25),
-                  child: Image.asset(
-                    sObj["image"],
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
+                  child: const Icon(Icons.music_note),
                 ),
                 Container(
                   width: 50,
@@ -53,11 +48,11 @@ class AllSongRow extends StatelessWidget {
               width: 15,
             ),
             Expanded(
-                child: Column(
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  sObj["name"],
+                  sObj["_display_name_wo_ext"],
                   maxLines: 1,
                   style: TextStyle(
                       color: TColor.primaryText60,
@@ -65,7 +60,7 @@ class AllSongRow extends StatelessWidget {
                       fontWeight: FontWeight.w700),
                 ),
                 Text(
-                  sObj["artists"],
+                  sObj["artist"],
                   maxLines: 1,
                   style: TextStyle(color: TColor.primaryText28, fontSize: 10),
                 )
