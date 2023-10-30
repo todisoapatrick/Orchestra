@@ -39,9 +39,11 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   sleek_circular_slider: ^2.0.1
   audio_service: ^0.18.11
+  on_audio_query: ^2.9.0
   just_audio: ^0.9.34
   get_it: ^7.6.0
   cached_network_image: ^3.2.3
+  permission_handler: ^11.0.1
 
 dev_dependencies:
   flutter_test:

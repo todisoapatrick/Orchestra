@@ -53,7 +53,7 @@ class AllSongRow extends StatelessWidget {
               width: 15,
             ),
             Expanded(
-                child: Column(
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(

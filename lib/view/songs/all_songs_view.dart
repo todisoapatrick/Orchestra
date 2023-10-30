@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import 'dart:developer';
+import '../../common/color_extension.dart';
 import 'package:get/get.dart';
-import 'package:orchestra/common_widget/all_song_row.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:orchestra/view/main_player/main_player_view.dart';
-import 'package:orchestra/view_model/all_songs_view_model.dart';
+
 
 class AllSongsView extends StatefulWidget {
   const AllSongsView({super.key});
@@ -12,27 +15,74 @@ class AllSongsView extends StatefulWidget {
 }
 
 class _AllSongsViewState extends State<AllSongsView> {
-  final allVM = Get.put(AllSongsViewModel());
+  final OnAudioQuery _audioQuery = OnAudioQuery();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  // playSong(String? uri) {
+  //   try{
+  //     _audioPlayer.setAudioSource(
+  //       AudioSource.uri(
+  //         Uri.parse(uri!)
+  //       )
+  //     );
+  //     //_audioPlayer.play();
+  //   } on Exception{
+  //     log("Error parsing song");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Obx(
-        () => ListView.builder(
-            padding: const EdgeInsets.all(20),
-            itemCount: allVM.allList.length,
-            itemBuilder: (context, index) {
-              var sObj = allVM.allList[index];
-
-              return AllSongRow(
-                sObj: sObj,
-                onPressed: () {},
-                onPressedPlay: () {
-                  Get.to(() => const MainPlayerView());
-                },
-              );
-            }),
+    return SafeArea(
+      child: Scaffold(
+    body: FutureBuilder<List<SongModel>>(
+      future: _audioQuery.querySongs(
+        sortType: null,
+        orderType: OrderType.ASC_OR_SMALLER,
+        uriType: UriType.EXTERNAL,
+        ignoreCase: true
       ),
+      builder: (context, item){
+        if(item.data == null){
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if(item.data!.isEmpty){
+          return const Center(
+            child: Text("Aucun Musique trouvé")
+          );
+        }
+        return ListView.builder(
+            padding: const EdgeInsets.all(20),
+            itemBuilder: (context, index) => ListTile(
+            leading: Image.asset('assets/img/songs_tab.png', width: 25, height: 25),
+            title: Text(item.data![index].displayNameWOExt, 
+                        maxLines: 1,
+                        style: TextStyle(
+                        color: TColor.primaryText60,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700),),
+            subtitle: Text("${item.data![index].artist}" == "<unknown>" ? "Unknown Artist" : "${item.data![index].artist}", 
+                            maxLines: 1,
+                            style: TextStyle(color: TColor.primaryText28, fontSize: 10)),
+            trailing: IconButton(
+              onPressed: () {
+                Get.to(() => MainPlayerView(songModel: item.data![index],));
+                //playSong(item.data![index].uri);
+              },
+              icon: Image.asset(
+                "assets/img/play_btn.png",
+                width: 25,
+                height: 25,
+              ),
+            ),
+          ),
+          itemCount: item.data!.length,
+        );
+      },
+    )
+    )
     );
   }
 }

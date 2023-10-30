@@ -4,6 +4,7 @@ import 'package:orchestra/audio_helpers/page_manager.dart';
 import 'package:orchestra/audio_helpers/service_locator.dart';
 import 'package:orchestra/common/color_extension.dart';
 import 'package:orchestra/view/splash_view.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,11 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     getIt<PageManager>().init();
+    requestPermission();
+  }
+
+  void requestPermission(){
+    Permission.storage.request();
   }
 
   @override
@@ -36,7 +42,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return SafeArea(child: GetMaterialApp(
       title: 'Orchestra',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -52,6 +58,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: false,
       ),
       home: const SplashView(),
+    )
     );
   }
 }
