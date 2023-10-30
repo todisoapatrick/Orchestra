@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'dart:developer';
+import 'package:orchestra/provider/song_model_provider.dart';
+import 'package:provider/provider.dart';
 import '../../common/color_extension.dart';
 import 'package:get/get.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -18,18 +19,7 @@ class _AllSongsViewState extends State<AllSongsView> {
   final OnAudioQuery _audioQuery = OnAudioQuery();
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  // playSong(String? uri) {
-  //   try{
-  //     _audioPlayer.setAudioSource(
-  //       AudioSource.uri(
-  //         Uri.parse(uri!)
-  //       )
-  //     );
-  //     //_audioPlayer.play();
-  //   } on Exception{
-  //     log("Error parsing song");
-  //   }
-  // }
+  List<SongModel> allSongs = [];
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +46,11 @@ class _AllSongsViewState extends State<AllSongsView> {
         return ListView.builder(
             padding: const EdgeInsets.all(20),
             itemBuilder: (context, index) => ListTile(
-            leading: Image.asset('assets/img/songs_tab.png', width: 25, height: 25),
+            leading: QueryArtworkWidget(
+              id: item.data![index].id,
+              type: ArtworkType.AUDIO,
+              nullArtworkWidget: Image.asset('assets/img/songs_tab.png', width: 25, height: 25),
+            ),
             title: Text(item.data![index].displayNameWOExt, 
                         maxLines: 1,
                         style: TextStyle(
@@ -68,7 +62,8 @@ class _AllSongsViewState extends State<AllSongsView> {
                             style: TextStyle(color: TColor.primaryText28, fontSize: 10)),
             trailing: IconButton(
               onPressed: () {
-                Get.to(() => MainPlayerView(songModel: item.data![index],));
+                context.read<SongModelProvider>().setId(item.data![index].id);
+                Get.to(() => MainPlayerView(songModel: item.data![index], audioPlayer: _audioPlayer,));
                 //playSong(item.data![index].uri);
               },
               icon: Image.asset(
