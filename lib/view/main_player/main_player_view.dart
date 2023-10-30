@@ -1,19 +1,21 @@
-import 'dart:developer';
-
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:orchestra/common_widget/player_bottom_button.dart';
+import 'package:orchestra/provider/song_model_provider.dart';
 import 'package:orchestra/view/main_player/driver_mode_view.dart';
 import 'package:orchestra/view/main_player/play_playlist_view.dart';
+import 'package:provider/provider.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 import '../../common/color_extension.dart';
 
 class MainPlayerView extends StatefulWidget {
-  const MainPlayerView({super.key, required this.songModel});
+  const MainPlayerView({super.key, required this.songModel, required this.audioPlayer});
   final SongModel songModel;
+  final AudioPlayer audioPlayer;
 
   @override
   State<MainPlayerView> createState() => _MainPlayerViewState();
@@ -21,28 +23,74 @@ class MainPlayerView extends StatefulWidget {
 
 class _MainPlayerViewState extends State<MainPlayerView> {
 
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  Duration _duration = const Duration();
+  Duration _position = const Duration();
 
   bool _isPlaying = false;
+  List<AudioSource> songList = [];
+
+  void seekToSeconds(int seconds){
+    Duration duration = Duration(seconds: seconds);
+    widget.audioPlayer.seek(duration);
+  }
 
   @override
   void initState() {
     super.initState();
-    playSong();
+    parseSong();
   }
 
-  void playSong(){
+  void parseSong(){
     try {
-      _audioPlayer.setAudioSource(
+      widget.audioPlayer.setAudioSource(
       AudioSource.uri(
-        Uri.parse(widget.songModel.uri!)
+        Uri.parse(widget.songModel.uri!),
+        tag: MediaItem(
+          id: widget.songModel.id.toString(),
+          album: widget.songModel.album ?? "No Album",
+          title: widget.songModel.displayNameWOExt,
+          artUri: Uri.parse(widget.songModel.id.toString())),
       )
     );
-    _audioPlayer.play();
+
+    widget.audioPlayer.play();
     _isPlaying = true;
-    } on Exception{
-      log("Error parsing song");
+
+    widget.audioPlayer.durationStream.listen((duration) {
+      if (duration != null){
+        setState(() {
+          _duration = duration;
+        });
+      }
+    });
+    widget.audioPlayer.positionStream.listen((position) {
+      setState(() {
+        _position = position;
+      });
+    });
+    listenToEvent();
+    } on Exception catch (_){
+      Get.back();
     }
+  }
+
+  void listenToEvent(){
+    widget.audioPlayer.playerStateStream.listen((state) {
+      if (state.playing){
+        setState(() {
+          _isPlaying = true;
+        });
+      } else {
+        setState(() {
+          _isPlaying = false;
+        });
+      }
+      if (state.processingState == ProcessingState.completed){
+        setState(() {
+          _isPlaying = false;
+        });
+      }
+    });
   }
 
   @override
@@ -54,7 +102,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
         elevation: 0,
         leading: IconButton(
           onPressed: () {
-            _audioPlayer.stop();
+            //widget.audioPlayer.stop();
             Get.back();
           },
           icon: Image.asset(
@@ -181,12 +229,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(media.width * 0.7),
-                  child: Image.asset(
-                    "assets/img/player_image.png",
-                    width: media.width * 0.6,
-                    height: media.width * 0.6,
-                    fit: BoxFit.cover,
-                  ),
+                  child: const ArtWorkWidget(),
                 ),
                 SizedBox(
                   width: media.width * 0.6,
@@ -228,11 +271,14 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                         startAngle: 270,
                         angleRange: 360,
                         size: 350.0),
-                    min: 0,
-                    max: 100,
-                    initialValue: 60,
+                    min: 0.0,
+                    max: _duration.inSeconds.toDouble() + 1.0,
+                    initialValue: _position.inSeconds.toDouble(),
                     onChange: (double value) {
-                      // callback providing a value while its being changed (with a pan gesture)
+                      setState(() {
+                        seekToSeconds(value.toInt());
+                        value = value;
+                      });
                     },
                     onChangeStart: (double startValue) {
                       // callback providing a starting value (when a pan gesture starts)
@@ -248,7 +294,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
               height: 10,
             ),
             Text(
-              "3:15|4:26",
+              "${_position.toString().split('.')[0]} | ${_duration.toString().split('.')[0]}",
               style: TextStyle(color: TColor.secondaryText, fontSize: 12),
             ),
             const SizedBox(
@@ -294,7 +340,11 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                   width: 45,
                   height: 45,
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if(widget.audioPlayer.hasPrevious){
+                        widget.audioPlayer.seekToPrevious();
+                      }
+                    },
                     icon: Image.asset(
                       "assets/img/previous_song.png",
                     ),
@@ -310,9 +360,9 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                     onPressed: () {
                       setState(() {
                         if(_isPlaying) {
-                          _audioPlayer.pause();
+                          widget.audioPlayer.pause();
                         } else{
-                          _audioPlayer.play();
+                          widget.audioPlayer.play();
                         }
                         _isPlaying = !_isPlaying;
                       });
@@ -328,7 +378,11 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                   width: 45,
                   height: 45,
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if(widget.audioPlayer.hasNext){
+                        widget.audioPlayer.seekToNext();
+                      }
+                    },
                     icon: Image.asset(
                       "assets/img/next_song.png",
                     ),
@@ -368,5 +422,24 @@ class _MainPlayerViewState extends State<MainPlayerView> {
       ),
     )
     );
+  }
+}
+
+class ArtWorkWidget extends StatelessWidget {
+  const ArtWorkWidget({
+    Key? key
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context){
+    var media = MediaQuery.sizeOf(context);
+    return QueryArtworkWidget(
+                            id: context.watch<SongModelProvider>().id,
+                            type: ArtworkType.AUDIO,
+                            nullArtworkWidget: Image.asset('assets/img/songs_tab.png', width: media.width * 0.6, height: media.width * 0.6),
+                            artworkHeight: media.width * 0.6,
+                            artworkWidth: media.width * 0.6,
+                            artworkFit: BoxFit.cover,
+                          );
   }
 }
