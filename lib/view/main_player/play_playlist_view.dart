@@ -63,7 +63,7 @@ class _PlayPlayListViewState extends State<PlayPlayListView> {
                     value: 1,
                     height: 30,
                     child: Text(
-                      "Social Share",
+                      "Partage Social",
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
@@ -71,7 +71,7 @@ class _PlayPlayListViewState extends State<PlayPlayListView> {
                     value: 2,
                     height: 30,
                     child: Text(
-                      "Playing Queue",
+                      "Liste de lecture",
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
@@ -79,7 +79,7 @@ class _PlayPlayListViewState extends State<PlayPlayListView> {
                     value: 3,
                     height: 30,
                     child: Text(
-                      "Add to playlist...",
+                      "Ajouter au playlist...",
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
@@ -87,7 +87,7 @@ class _PlayPlayListViewState extends State<PlayPlayListView> {
                     value: 4,
                     height: 30,
                     child: Text(
-                      "Lyrics",
+                      "Paroles",
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
@@ -111,7 +111,7 @@ class _PlayPlayListViewState extends State<PlayPlayListView> {
                     value: 7,
                     height: 30,
                     child: Text(
-                      "Sleep timer",
+                      "Timer de veille",
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
@@ -119,7 +119,7 @@ class _PlayPlayListViewState extends State<PlayPlayListView> {
                     value: 8,
                     height: 30,
                     child: Text(
-                      "Equaliser",
+                      "Equaliseur",
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
@@ -127,7 +127,7 @@ class _PlayPlayListViewState extends State<PlayPlayListView> {
                     value: 9,
                     height: 30,
                     child: Text(
-                      "Driver mode",
+                      "Mode conduite",
                       style: TextStyle(fontSize: 12),
                     ),
                   ),

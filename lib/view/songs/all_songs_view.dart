@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import 'dart:developer';
 import '../../common/color_extension.dart';
 import 'package:get/get.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -13,11 +15,26 @@ class AllSongsView extends StatefulWidget {
 }
 
 class _AllSongsViewState extends State<AllSongsView> {
-  final _audioQuery = OnAudioQuery();
+  final OnAudioQuery _audioQuery = OnAudioQuery();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  // playSong(String? uri) {
+  //   try{
+  //     _audioPlayer.setAudioSource(
+  //       AudioSource.uri(
+  //         Uri.parse(uri!)
+  //       )
+  //     );
+  //     //_audioPlayer.play();
+  //   } on Exception{
+  //     log("Error parsing song");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
     body: FutureBuilder<List<SongModel>>(
       future: _audioQuery.querySongs(
         sortType: null,
@@ -46,11 +63,14 @@ class _AllSongsViewState extends State<AllSongsView> {
                         color: TColor.primaryText60,
                         fontSize: 13,
                         fontWeight: FontWeight.w700),),
-            subtitle: Text("${item.data![index].artist}", 
+            subtitle: Text("${item.data![index].artist}" == "<unknown>" ? "Unknown Artist" : "${item.data![index].artist}", 
                             maxLines: 1,
                             style: TextStyle(color: TColor.primaryText28, fontSize: 10)),
             trailing: IconButton(
-              onPressed: () {Get.to(() => const MainPlayerView());},
+              onPressed: () {
+                Get.to(() => MainPlayerView(songModel: item.data![index],));
+                //playSong(item.data![index].uri);
+              },
               icon: Image.asset(
                 "assets/img/play_btn.png",
                 width: 25,
@@ -61,6 +81,7 @@ class _AllSongsViewState extends State<AllSongsView> {
           itemCount: item.data!.length,
         );
       },
+    )
     )
     );
   }

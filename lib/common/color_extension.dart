@@ -22,7 +22,7 @@ class TColor {
   static List<Color> get primaryG => [ focusStart, focus ];
   static List<Color> get secondaryG => [secondaryStart, secondaryEnd];
 
-  static Color get bg => const Color(0xff181B2C);
+  static Color get bg => const Color(0xff1E1E1E);
   static Color get darkGray => const Color(0xff383B49);
   static Color get lightGray => const Color(0xffD0D1D4);
 }

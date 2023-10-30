@@ -42,7 +42,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return SafeArea(child: GetMaterialApp(
       title: 'Orchestra',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -58,6 +58,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: false,
       ),
       home: const SplashView(),
+    )
     );
   }
 }

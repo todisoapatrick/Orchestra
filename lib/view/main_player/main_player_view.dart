@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:orchestra/common_widget/player_bottom_button.dart';
 import 'package:orchestra/view/main_player/driver_mode_view.dart';
 import 'package:orchestra/view/main_player/play_playlist_view.dart';
@@ -8,22 +12,49 @@ import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import '../../common/color_extension.dart';
 
 class MainPlayerView extends StatefulWidget {
-  const MainPlayerView({super.key});
+  const MainPlayerView({super.key, required this.songModel});
+  final SongModel songModel;
 
   @override
   State<MainPlayerView> createState() => _MainPlayerViewState();
 }
 
 class _MainPlayerViewState extends State<MainPlayerView> {
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    playSong();
+  }
+
+  void playSong(){
+    try {
+      _audioPlayer.setAudioSource(
+      AudioSource.uri(
+        Uri.parse(widget.songModel.uri!)
+      )
+    );
+    _audioPlayer.play();
+    _isPlaying = true;
+    } on Exception{
+      log("Error parsing song");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.sizeOf(context);
-    return Scaffold(
+    return SafeArea(child: Scaffold(
       appBar: AppBar(
         backgroundColor: TColor.bg,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
+            _audioPlayer.stop();
             Get.back();
           },
           icon: Image.asset(
@@ -34,7 +65,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
           ),
         ),
         title: Text(
-          "Now Playing",
+          "Joué maintenant",
           style: TextStyle(
               color: TColor.primaryText80,
               fontSize: 17,
@@ -64,7 +95,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                           value: 1,
                           height: 30,
                           child: Text(
-                            "Social Share",
+                            "Partage Social",
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -72,7 +103,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                           value: 2,
                            height: 30,
                           child: Text(
-                            "Playing Queue",
+                            "Liste de lecture",
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -80,7 +111,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                           value: 3,
                           height: 30,
                           child: Text(
-                            "Add to playlist...",
+                            "Ajouter au playlist...",
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -88,7 +119,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                           value: 4,
                            height: 30,
                           child: Text(
-                            "Lyrics",
+                            "Paroles",
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -112,7 +143,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                           value: 7,
                           height: 30,
                           child: Text(
-                            "Sleep timer",
+                            "Timer de veille",
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -120,7 +151,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                           value: 8,
                           height: 30,
                           child: Text(
-                            "Equaliser",
+                            "Equaliseur",
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -128,7 +159,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                           value: 9,
                           height: 30,
                           child: Text(
-                            "Driver mode",
+                            "Mode conduite",
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -224,7 +255,9 @@ class _MainPlayerViewState extends State<MainPlayerView> {
               height: 25,
             ),
             Text(
-              "Black or White",
+              widget.songModel.displayNameWOExt,
+              overflow: TextOverflow.fade,
+              maxLines: 1,
               style: TextStyle(
                   color: TColor.primaryText.withOpacity(0.9),
                   fontSize: 18,
@@ -234,7 +267,9 @@ class _MainPlayerViewState extends State<MainPlayerView> {
               height: 10,
             ),
             Text(
-              "Michael Jackson • Album - Dangerous",
+              "${widget.songModel.artist}" == "<unknown>" ? "Unknown Artist" : "${widget.songModel.artist}",
+              overflow: TextOverflow.fade,
+              maxLines: 1,
               style: TextStyle(color: TColor.secondaryText, fontSize: 12),
             ),
             const SizedBox(
@@ -272,10 +307,18 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                   width: 60,
                   height: 60,
                   child: IconButton(
-                    onPressed: () {},
-                    icon: Image.asset(
-                      "assets/img/play.png",
-                    ),
+                    onPressed: () {
+                      setState(() {
+                        if(_isPlaying) {
+                          _audioPlayer.pause();
+                        } else{
+                          _audioPlayer.play();
+                        }
+                        _isPlaying = !_isPlaying;
+                      });
+                    },
+                    icon: Image.asset(_isPlaying ? "assets/img/pause.png" : "assets/img/play.png",
+                                color: TColor.primaryText,)
                   ),
                 ),
                 const SizedBox(
@@ -303,11 +346,11 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                       Get.to( () => const PlayPlayListView() );
                     }),
                 PlayerBottomButton(
-                    title: "Shuffle",
+                    title: "Aléatoire",
                     icon: "assets/img/shuffle.png",
                     onPressed: () {}),
                 PlayerBottomButton(
-                    title: "Repeat",
+                    title: "Repeter",
                     icon: "assets/img/repeat.png",
                     onPressed: () {}),
                 PlayerBottomButton(
@@ -315,7 +358,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                     icon: "assets/img/eq.png",
                     onPressed: () {}),
                  PlayerBottomButton(
-                    title: "Favourites",
+                    title: "Favoris",
                     icon: "assets/img/fav.png",
                     onPressed: () {}),
               ],
@@ -323,6 +366,7 @@ class _MainPlayerViewState extends State<MainPlayerView> {
           ],
         ),
       ),
+    )
     );
   }
 }
